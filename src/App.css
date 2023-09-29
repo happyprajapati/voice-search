@@ -4,17 +4,12 @@ body{
   height: 100vh;
   margin: 0;
   padding: 0;
-  /* background-color: #000000; */
   font-family: 'Handjet', cursive;
 }
 
 .prompt{
-  /* width: 100%; */
   display: flex;
-  justify-content: space-around;
-  margin: 0 30px;
-  /* position: fixed;
-  top: 0; */
+  justify-content: center;
   color: #ffffff;
   filter: drop-shadow(0 0 8px #ffffff);
 }
@@ -22,8 +17,6 @@ body{
 .terminal{
   color: #ffffff;
   filter: drop-shadow(0 0 8px #ffffff);
-  /* position: fixed;
-  top: 14%; */
   margin: 0 30px;
   font-size: 24px;
 }
@@ -33,20 +26,22 @@ body{
 }
 
 .prompt h1{
-  /* font-size: 18px; */
   text-transform: capitalize;
 }
-
-.lst , .st, .prompt button{
+.lst{
+  display: flex;
+  justify-content: center;
   position: fixed;
-  bottom: 1%;
-  cursor: pointer;
-  /* bottom: 9%; */
-  right: 0;
+  bottom: 0;
+  width: 100%;
+}
+button{
   margin: 10px 50px;
+  align-items: center;
   padding: 0 10px;
   height: 50px;
   border: 1px solid #ffffff;
+  font-size: 16px;
   color: #ffffff;
   background-color: #000000;
   font-family: 'Times New Roman', cursive;
@@ -54,8 +49,3 @@ body{
   filter: drop-shadow(0 0 5px #ffffff);
   border-radius: 10px;
 }
-
-.st{
-  bottom: 0%;
-}
-

@@ -82,16 +82,6 @@ function App() {
             cursorColor="green"
           />
         </h1>
-        {btn && (
-          <button
-            onClick={() => {
-              resetTranscript();
-              setChat([{ que: "", ans: "" }]);
-            }}
-          >
-            Clear
-          </button>
-        )}
       </div>
 
       <div className="terminal">
@@ -113,11 +103,19 @@ function App() {
       </div>
 
       {btn && (
-        <button className="lst" onClick={startListning}>
+        <div className="lst">
+        <button onClick={startListning}>
           Start Listning
         </button>
+        <button 
+        onClick={() => {
+          resetTranscript();
+          setChat([{ que: "", ans: "" }]);
+        }}
+      >
+        Clear
+      </button></div>
       )}
-      {/* {btn && <button className="st" onClick={stopListning}>Stop Listning</button>} */}
     </>
   );
 }
