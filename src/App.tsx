@@ -86,6 +86,7 @@ function App() {
           <button
             onClick={() => {
               resetTranscript();
+              setChat([{ que: "", ans: "" }]);
             }}
           >
             Clear
