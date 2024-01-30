@@ -12,7 +12,7 @@ import { Tooltip } from "react-tooltip";
 import { Rings, RotatingLines } from "react-loader-spinner";
 
 import "./App.css";
-// let flagcmd = false;
+let flagcmd = false;
 
 function App() {
   const [btn, setBtn] = useState(false);
@@ -20,8 +20,7 @@ function App() {
   const [loader, setLoader] = useState(false);
   const [flag, setFlag] = useState(true);
   const [clrflag, setClrflag] = useState(true);
-  const [abortflag, setabortflag] = useState(false);
-  // const [cmdflag, setCmdflag] = useState("false");
+  const [cmdflag, setCmdflag] = useState("false");
   const [chat, setChat] = useState([
     {
       que: "",
@@ -42,30 +41,30 @@ function App() {
         setClrflag(false);
       },
     },
-    // {
-    //   command: "what is your name",
-    //   callback: () => {
-    //     setLoader(true);
-    //     if (flag) {
-    //       setChat([{ que: transcript, ans: "My name is Nobody's Terminal." }]);
-    //       setFlag(false);
-    //     } else {
-    //       setChat((data) => [
-    //         ...data,
-    //         { que: transcript, ans: "My name is Nobody's Terminal." },
-    //       ]);
-    //     }
-    //     setLoader(false);
-    //     // console.log("jfbwehjrfvlewhfvler");
-    //   },
-    // },
-    // {
-    //   command: ["who is your creater", "who is your owner", "who creates you"],
-    //   callback: () => {
-    //     setLoader(true);
-    //     setLoader(false);
-    //   },
-    // },
+    {
+      command: "what is your name",
+      callback: () => {
+        setLoader(true);
+        if (flag) {
+          setChat([{ que: transcript, ans: "My name is Nobody's Terminal." }]);
+          setFlag(false);
+        } else {
+          setChat((data) => [
+            ...data,
+            { que: transcript, ans: "My name is Nobody's Terminal." },
+          ]);
+        }
+        setLoader(false);
+        // console.log("jfbwehjrfvlewhfvler");
+      },
+    },
+    {
+      command: ["who is your creater", "who is your owner", "who creates you"],
+      callback: () => {
+        setLoader(true);
+        setLoader(false);
+      },
+    },
   ];
 
   const {
@@ -81,22 +80,20 @@ function App() {
     });
   };
 
-  // useEffect(()=>{
-  //   if (transcript != "" && clrflag == true) {
-  //     commands.map((command) => {
-  //       if (command.command === transcript) {
-  //         setCmdflag("true");
-  //         flagcmd = true;
-  //         console.log(cmdflag);
-  //         command.callback();
-  //       }
-  //     });
-  //   }
-  // },[listening])
+  useEffect(()=>{
+    if (transcript != "" && clrflag == true) {
+      commands.map((command) => {
+        if (command.command === transcript) {
+          setCmdflag("true");
+          flagcmd = true;
+          console.log(cmdflag);
+          command.callback();
+        }
+      });
+    }
+  },[listening])
 
   useEffect(() => {
-    const controller = new AbortController();
-    // const signal = controller.signal;
     if (transcript != "" && clrflag == true) {
       // commands.map((command) => {
       //   if (command.command == transcript) {
@@ -105,13 +102,12 @@ function App() {
       //     command.callback();
       //   }
       // });
-      // console.log(cmdflag);
-      // if (flagcmd === false) {
+      console.log(cmdflag);
+      if (flagcmd === false) {
         setLoader(true);
         axios({
           method: "get",
           url: `https://aimodel-lkbp.onrender.com/${transcript}`,
-          signal: controller.signal,
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
@@ -128,18 +124,12 @@ function App() {
               ]);
             }
             setLoader(false);
-            if(abortflag) controller.abort();
           })
           .catch((err) => {
-            if (axios.isCancel(err)){
-              console.log("axios request cancelled");
-              setLoader(false);
-             }else{
-               console.log(err);
-               setLoader(false);
-             }
+            console.log(err);
+            setLoader(false);
           });
-      // }
+      }
     }
   }, [listening]);
 
