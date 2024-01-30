@@ -20,7 +20,7 @@ function App() {
   const [loader, setLoader] = useState(false);
   const [flag, setFlag] = useState(true);
   const [clrflag, setClrflag] = useState(true);
-  const [abortflag, setabortflag] = useState(false);
+  const [abortflag, setAbortflag] = useState(false);
   // const [cmdflag, setCmdflag] = useState("false");
   const [chat, setChat] = useState([
     {
@@ -40,6 +40,7 @@ function App() {
         setChat([{ que: "", ans: "" }]);
         setLoader(false);
         setClrflag(false);
+        setAbortflag(true);
       },
     },
     // {
@@ -234,6 +235,7 @@ function App() {
                 setChat([{ que: "", ans: "" }]);
                 setLoader(false);
                 setClrflag(false);
+                setAbortflag(true);
               }}
             >
               Clear
