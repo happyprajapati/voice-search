@@ -2,7 +2,7 @@
 
 import "regenerator-runtime/runtime";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SpeechRecognation, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -20,8 +20,8 @@ function App() {
   const [loader, setLoader] = useState(false);
   const [flag, setFlag] = useState(true);
   const [clrflag, setClrflag] = useState(true);
-  const [abortflag, setAbortflag] = useState(false);
-  // const [cmdflag, setCmdflag] = useState("false");
+  const [typingflag, setTypingflag] = useState(false);
+  const controller = useRef<AbortController>();
   const [chat, setChat] = useState([
     {
       que: "",
@@ -40,33 +40,11 @@ function App() {
         setChat([{ que: "", ans: "" }]);
         setLoader(false);
         setClrflag(false);
-        setAbortflag(true);
+        if(controller.current){
+          controller.current.abort();
+        }
       },
     },
-    // {
-    //   command: "what is your name",
-    //   callback: () => {
-    //     setLoader(true);
-    //     if (flag) {
-    //       setChat([{ que: transcript, ans: "My name is Nobody's Terminal." }]);
-    //       setFlag(false);
-    //     } else {
-    //       setChat((data) => [
-    //         ...data,
-    //         { que: transcript, ans: "My name is Nobody's Terminal." },
-    //       ]);
-    //     }
-    //     setLoader(false);
-    //     // console.log("jfbwehjrfvlewhfvler");
-    //   },
-    // },
-    // {
-    //   command: ["who is your creater", "who is your owner", "who creates you"],
-    //   callback: () => {
-    //     setLoader(true);
-    //     setLoader(false);
-    //   },
-    // },
   ];
 
   const {
@@ -82,37 +60,15 @@ function App() {
     });
   };
 
-  // useEffect(()=>{
-  //   if (transcript != "" && clrflag == true) {
-  //     commands.map((command) => {
-  //       if (command.command === transcript) {
-  //         setCmdflag("true");
-  //         flagcmd = true;
-  //         console.log(cmdflag);
-  //         command.callback();
-  //       }
-  //     });
-  //   }
-  // },[listening])
-
   useEffect(() => {
-    const controller = new AbortController();
-    // const signal = controller.signal;
+    controller.current = new AbortController();
+    const signal = controller.current.signal;
     if (transcript != "" && clrflag == true) {
-      // commands.map((command) => {
-      //   if (command.command == transcript) {
-      //     setCmdflag(true);
-      //     console.log(cmdflag);
-      //     command.callback();
-      //   }
-      // });
-      // console.log(cmdflag);
-      // if (flagcmd === false) {
         setLoader(true);
         axios({
           method: "get",
           url: `https://aimodel-lkbp.onrender.com/${transcript}`,
-          signal: controller.signal,
+          signal,
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
@@ -129,7 +85,6 @@ function App() {
               ]);
             }
             setLoader(false);
-            if(abortflag) controller.abort();
           })
           .catch((err) => {
             if (axios.isCancel(err)){
@@ -204,9 +159,11 @@ function App() {
               <div className="data" key={index}>
                 Q. &nbsp;
                 <Typewriter words={[data.que]} typeSpeed={20} cursorStyle="|" />
+                <button className="btn" onClick={()=>{setTypingflag(true)}}>Skip Typing</button>
                 <br />
                 &gt; &nbsp;
-                <Typewriter words={[data.ans]} typeSpeed={20} cursorStyle="|" />
+                {!typingflag && <Typewriter words={[data.ans]} typeSpeed={20} cursorStyle="|" />}
+                {typingflag && data.ans}
               </div>
             )
           );
@@ -235,7 +192,9 @@ function App() {
                 setChat([{ que: "", ans: "" }]);
                 setLoader(false);
                 setClrflag(false);
-                setAbortflag(true);
+                if(controller.current){
+                  controller.current.abort();
+                }
               }}
             >
               Clear
