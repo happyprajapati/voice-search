@@ -3,13 +3,12 @@
 import "regenerator-runtime/runtime";
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
-import SpeechRecognation, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
+import SpeechRecognation, { useSpeechRecognition } from "react-speech-recognition";
 import { Typewriter } from "react-simple-typewriter";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { Rings, RotatingLines } from "react-loader-spinner";
+import { useSpeechSynthesis } from 'react-speech-kit';
 
 import "./App.css";
 // let flagcmd = false;
@@ -19,9 +18,12 @@ function App() {
   const [msg, setMsg] = useState(true);
   const [loader, setLoader] = useState(false);
   const [flag, setFlag] = useState(true);
-  const [clrflag, setClrflag] = useState(true);
+  // const [clrflag, setClrflag] = useState(true);
+  const [cmdflag, setCmdflag] = useState(false);
   const [typingflag, setTypingflag] = useState(false);
+  const [listenflag, setListenflag] = useState(false);
   const controller = useRef<AbortController>();
+  const { speak, cancel, speaking } = useSpeechSynthesis();
   const [chat, setChat] = useState([
     {
       que: "",
@@ -32,6 +34,28 @@ function App() {
     setBtn(true);
   }, 1900);
 
+  const abortReq = () =>{
+    if(controller.current){
+      controller.current.abort();
+    }
+    setCmdflag(true);
+  }
+
+  const owner = () =>{
+    setLoader(true);
+        if (flag) {
+          setChat([{ que: transcript, ans: "I was designed by Happy Prajapati." }]);
+          setFlag(false);
+        } else {
+          setChat((data) => [
+            ...data,
+            { que: transcript, ans: "I was designed by Happy Prajapati." },
+          ]);
+        }
+        setLoader(false);
+        abortReq();
+  }
+
   const commands = [
     {
       command: "clear",
@@ -39,10 +63,51 @@ function App() {
         resetTranscript();
         setChat([{ que: "", ans: "" }]);
         setLoader(false);
-        setClrflag(false);
-        if(controller.current){
-          controller.current.abort();
+        abortReq();
+      },
+    },
+    // {
+    //   command: "open *",
+    //   callback: (website: string) => {
+    //     setLoader(true);
+    //     window.open("http://" + website.split(" ").join(""));
+    //     setLoader(false);
+    //     abortReq();
+    //   },
+    // },
+    {
+      command: "what is your name",
+      callback: () => {
+        setLoader(true);
+        if (flag) {
+          setChat([{ que: transcript, ans: "My name is Nobody's Terminal." }]);
+          setFlag(false);
+        } else {
+          setChat((data) => [
+            ...data,
+            { que: transcript, ans: "My name is Nobody's Terminal." },
+          ]);
         }
+        setLoader(false);
+        abortReq();
+      },
+    },
+    {
+      command: 'who is your creator',
+      callback: () => {
+        owner();
+      },
+    },
+    {
+      command: 'who is your owner',
+      callback: () => {
+        owner();
+      },
+    },
+    {
+      command: 'who creates you',
+      callback: () => {
+        owner();
       },
     },
   ];
@@ -50,6 +115,7 @@ function App() {
   const {
     transcript,
     browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
     resetTranscript,
     listening,
   } = useSpeechRecognition({ commands });
@@ -58,12 +124,23 @@ function App() {
     SpeechRecognation.startListening({
       language: "en-IN",
     });
+    if (!isMicrophoneAvailable) {
+      setChat([{ que: "Microphone doesn't found.", ans: "" }]);
+    }
   };
 
   useEffect(() => {
     controller.current = new AbortController();
     const signal = controller.current.signal;
-    if (transcript != "" && clrflag == true) {
+    if (transcript != "") {
+        commands.map((command) => {
+          if (command.command == transcript) {
+            // setCmdflag(true);
+            // console.log(cmdflag);
+            command.callback();
+          }
+        });
+      if (cmdflag === false) {
         setLoader(true);
         axios({
           method: "get",
@@ -95,7 +172,7 @@ function App() {
                setLoader(false);
              }
           });
-      // }
+      }
     }
   }, [listening]);
 
@@ -160,6 +237,8 @@ function App() {
                 Q. &nbsp;
                 <Typewriter words={[data.que]} typeSpeed={20} cursorStyle="|" />
                 <button className="btn" onClick={()=>{setTypingflag(true)}}>Skip Typing</button>
+                {!speaking && <button className="btn" onClick={()=>{setListenflag(true); speak({ text: data.ans })}}>Listen</button>}
+                {speaking && <button className="btn" onClick={()=>{setListenflag(false); cancel()}}>Stop Listening</button>}
                 <br />
                 &gt; &nbsp;
                 {!typingflag && <Typewriter words={[data.ans]} typeSpeed={20} cursorStyle="|" />}
@@ -175,6 +254,7 @@ function App() {
       {btn && (
         <div className="lst">
           <button
+            className="btn-bottom"
             onClick={() => {
               startListning();
               setMsg(false);
@@ -187,14 +267,12 @@ function App() {
             data-tooltip-content="Speaking 'clear' also clear the content"
           >
             <button
+              className="btn-bottom"
               onClick={() => {
                 resetTranscript();
                 setChat([{ que: "", ans: "" }]);
                 setLoader(false);
-                setClrflag(false);
-                if(controller.current){
-                  controller.current.abort();
-                }
+                abortReq();
               }}
             >
               Clear
