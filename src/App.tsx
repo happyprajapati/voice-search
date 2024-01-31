@@ -11,17 +11,14 @@ import { Rings, RotatingLines } from "react-loader-spinner";
 import { useSpeechSynthesis } from 'react-speech-kit';
 
 import "./App.css";
-// let flagcmd = false;
 
 function App() {
   const [btn, setBtn] = useState(false);
   const [msg, setMsg] = useState(true);
   const [loader, setLoader] = useState(false);
   const [flag, setFlag] = useState(true);
-  // const [clrflag, setClrflag] = useState(true);
   const [cmdflag, setCmdflag] = useState(false);
   const [typingflag, setTypingflag] = useState(false);
-  const [listenflag, setListenflag] = useState(false);
   const controller = useRef<AbortController>();
   const { speak, cancel, speaking } = useSpeechSynthesis();
   const [chat, setChat] = useState([
@@ -66,15 +63,6 @@ function App() {
         abortReq();
       },
     },
-    // {
-    //   command: "open *",
-    //   callback: (website: string) => {
-    //     setLoader(true);
-    //     window.open("http://" + website.split(" ").join(""));
-    //     setLoader(false);
-    //     abortReq();
-    //   },
-    // },
     {
       command: "what is your name",
       callback: () => {
@@ -135,8 +123,6 @@ function App() {
     if (transcript != "") {
         commands.map((command) => {
           if (command.command == transcript) {
-            // setCmdflag(true);
-            // console.log(cmdflag);
             command.callback();
           }
         });
@@ -176,9 +162,6 @@ function App() {
     }
   }, [listening]);
 
-  // console.log(commands.map((command) => command.command == transcript) == null);
-  // if(commands.filter((command)=>command.command==transcript)[0].command == null)
-
   if (!browserSupportsSpeechRecognition) {
     return null;
   }
@@ -205,7 +188,6 @@ function App() {
       </div>
 
       <div className="terminal">
-        {/* <p>{commands.map((command) => command.command)}:</p> */}
         {listening && (
           <Rings
             height="35"
@@ -237,8 +219,8 @@ function App() {
                 Q. &nbsp;
                 <Typewriter words={[data.que]} typeSpeed={20} cursorStyle="|" />
                 <button className="btn" onClick={()=>{setTypingflag(true)}}>Skip Typing</button>
-                {!speaking && <button className="btn" onClick={()=>{setListenflag(true); speak({ text: data.ans })}}>Listen</button>}
-                {speaking && <button className="btn" onClick={()=>{setListenflag(false); cancel()}}>Stop Listening</button>}
+                {!speaking && <button className="btn" onClick={()=>{speak({ text: data.ans })}}>Listen</button>}
+                {speaking && <button className="btn" onClick={()=>{cancel()}}>Stop Listening</button>}
                 <br />
                 &gt; &nbsp;
                 {!typingflag && <Typewriter words={[data.ans]} typeSpeed={20} cursorStyle="|" />}
