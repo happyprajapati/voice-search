@@ -19,6 +19,7 @@ function App() {
   const [flag, setFlag] = useState(true);
   const [cmdflag, setCmdflag] = useState(false);
   const [typingflag, setTypingflag] = useState(false);
+  const [listenflag, setListenflag] = useState(0);
   const controller = useRef<AbortController>();
   const { speak, cancel, speaking } = useSpeechSynthesis();
   const [chat, setChat] = useState([
@@ -219,8 +220,8 @@ function App() {
                 Q. &nbsp;
                 <Typewriter words={[data.que]} typeSpeed={20} cursorStyle="|" />
                 <button className="btn" onClick={()=>{setTypingflag(true)}}>Skip Typing</button>
-                {!speaking && <button className="btn" onClick={()=>{speak({ text: data.ans })}}>Listen</button>}
-                {speaking && <button className="btn" onClick={()=>{cancel()}}>Stop Listening</button>}
+                {!speaking && <button className="btn" onClick={()=>{speak({ text: data.ans }); setListenflag(index)}}>Listen</button>}
+                {speaking && listenflag==index && <button className="btn" onClick={()=>{cancel()}}>Stop Listening</button>}
                 <br />
                 &gt; &nbsp;
                 {!typingflag && <Typewriter words={[data.ans]} typeSpeed={20} cursorStyle="|" />}
