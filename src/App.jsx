@@ -178,6 +178,12 @@ function App() {
     }
   },[typingflag])
 
+  useEffect(() => {
+    chat.map((data, index) => {
+      setTypingbtn(index);
+    })
+  },[chat])
+
   if (!browserSupportsSpeechRecognition) {
     return null;
   }
@@ -287,8 +293,6 @@ function App() {
                       words={[data.ans]}
                       typeSpeed={del}
                       cursorStyle="|"
-                      loop={1}
-                      onLoopDone={() => setTypingbtn(index)}
                     />
                   )
                 </div>
