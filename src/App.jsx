@@ -1,14 +1,14 @@
-// "use client";
-
 import "regenerator-runtime/runtime";
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
-import SpeechRecognation, { useSpeechRecognition } from "react-speech-recognition";
+import SpeechRecognation, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import { Typewriter } from "react-simple-typewriter";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { Rings, RotatingLines } from "react-loader-spinner";
-import { useSpeechSynthesis } from 'react-speech-kit';
+import { useSpeechSynthesis } from "react-speech-kit";
 
 import "./App.css";
 
@@ -19,8 +19,10 @@ function App() {
   const [flag, setFlag] = useState(true);
   const [cmdflag, setCmdflag] = useState(false);
   const [typingflag, setTypingflag] = useState(false);
+  const [typingbtn, setTypingbtn] = useState(1);
+  const [del, setDel] = useState(20);
   const [listenflag, setListenflag] = useState(0);
-  const controller = useRef<AbortController>();
+  const controller = useRef();
   const { speak, cancel, speaking } = useSpeechSynthesis();
   const [chat, setChat] = useState([
     {
@@ -28,31 +30,33 @@ function App() {
       ans: "",
     },
   ]);
+
   setInterval(() => {
     setBtn(true);
   }, 1900);
 
-  const abortReq = () =>{
-    if(controller.current){
+  const abortReq = () => {
+    if (controller.current) {
       controller.current.abort();
     }
     setCmdflag(true);
-  }
+  };
 
-  const owner = () =>{
+  const owner = () => {
     setLoader(true);
-        if (flag) {
-          setChat([{ que: transcript, ans: "I was designed by Happy Prajapati." }]);
-          setFlag(false);
-        } else {
-          setChat((data) => [
-            ...data,
-            { que: transcript, ans: "I was designed by Happy Prajapati." },
-          ]);
-        }
-        setLoader(false);
-        abortReq();
-  }
+    if (flag) {
+      setChat([{ que: transcript, ans: "I was designed by Happy Prajapati." }]);
+      setFlag(false);
+    } else {
+      setChat((data) => [
+        ...data,
+        { que: transcript, ans: "I was designed by Happy Prajapati." },
+      ]);
+    }
+    setLoader(false);
+    setTypingflag(false);
+    abortReq();
+  };
 
   const commands = [
     {
@@ -61,6 +65,7 @@ function App() {
         resetTranscript();
         setChat([{ que: "", ans: "" }]);
         setLoader(false);
+        setTypingflag(false);
         abortReq();
       },
     },
@@ -78,23 +83,24 @@ function App() {
           ]);
         }
         setLoader(false);
+        setTypingflag(false);
         abortReq();
       },
     },
     {
-      command: 'who is your creator',
+      command: "who is your creator",
       callback: () => {
         owner();
       },
     },
     {
-      command: 'who is your owner',
+      command: "who is your owner",
       callback: () => {
         owner();
       },
     },
     {
-      command: 'who creates you',
+      command: "who creates you",
       callback: () => {
         owner();
       },
@@ -122,11 +128,11 @@ function App() {
     controller.current = new AbortController();
     const signal = controller.current.signal;
     if (transcript != "") {
-        commands.map((command) => {
-          if (command.command == transcript) {
-            command.callback();
-          }
-        });
+      commands.map((command) => {
+        if (command.command == transcript) {
+          command.callback();
+        }
+      });
       if (cmdflag === false) {
         setLoader(true);
         axios({
@@ -149,19 +155,28 @@ function App() {
               ]);
             }
             setLoader(false);
+            setTypingflag(false);
           })
           .catch((err) => {
-            if (axios.isCancel(err)){
+            if (axios.isCancel(err)) {
               console.log("axios request cancelled");
               setLoader(false);
-             }else{
-               console.log(err);
-               setLoader(false);
-             }
+            } else {
+              console.log(err);
+              setLoader(false);
+            }
           });
       }
     }
   }, [listening]);
+
+  useEffect(() => {
+    if(typingflag){
+      setDel(1);
+    }else{
+      setDel(20);
+    }
+  },[typingflag])
 
   if (!browserSupportsSpeechRecognition) {
     return null;
@@ -178,13 +193,22 @@ function App() {
           />
         </h1>
         {msg && (
-          <h2>
-            <Typewriter
-              words={["click 'start listning' & ask your question"]}
-              typeSpeed={30}
-              cursorStyle="|"
-            />
-          </h2>
+          <>
+            <h2>
+              <Typewriter
+                words={["click 'start listning' & ask your question"]}
+                typeSpeed={30}
+                cursorStyle="|"
+              />
+            </h2>
+            <h2>
+              <Typewriter
+                words={["for the first answer it may take few more time"]}
+                typeSpeed={30}
+                cursorStyle="|"
+              />
+            </h2>
+          </>
         )}
       </div>
 
@@ -212,24 +236,66 @@ function App() {
             visible={true}
           />
         )}
-        {chat.map((data, index) => {
-          return (
-            data.que != "" &&
-            data.ans != "" && (
-              <div className="data" key={index}>
-                Q. &nbsp;
-                <Typewriter words={[data.que]} typeSpeed={20} cursorStyle="|" />
-                <button className="btn" onClick={()=>{setTypingflag(true)}}>Skip Typing</button>
-                {!speaking && <button className="btn" onClick={()=>{speak({ text: data.ans }); setListenflag(index)}}>Listen</button>}
-                {speaking && listenflag==index && <button className="btn" onClick={()=>{cancel()}}>Stop Listening</button>}
-                <br />
-                &gt; &nbsp;
-                {!typingflag && <Typewriter words={[data.ans]} typeSpeed={20} cursorStyle="|" />}
-                {typingflag && data.ans}
-              </div>
-            )
-          );
-        })}
+
+        {
+          chat.map((data, index) => {
+            return (
+              data.que != "" &&
+              data.ans != "" && (
+                <div className="data" key={index}>
+                  Q. &nbsp;
+                  <Typewriter
+                    words={[data.que]}
+                    typeSpeed={20}
+                    cursorStyle="|"
+                  />
+                  {typingbtn == index && (
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        setTypingflag(true);
+                      }}
+                    >
+                      Fast Typing
+                    </button>
+                  )}
+                  {!speaking && (
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        speak({ text: data.ans });
+                        setListenflag(index);
+                      }}
+                    >
+                      Listen
+                    </button>
+                  )}
+                  {speaking && listenflag + 1 == index && (
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        cancel();
+                      }}
+                    >
+                      Stop Listening
+                    </button>
+                  )}
+                  <br />
+                  &gt; &nbsp;
+                  (
+                    <Typewriter
+                      words={[data.ans]}
+                      typeSpeed={del}
+                      cursorStyle="|"
+                      loop={1}
+                      onLoopDone={() => setTypingbtn(index)}
+                    />
+                  )
+                </div>
+              )
+            );
+          })
+        }
       </div>
 
       <Tooltip id="my-tooltip" />
@@ -241,6 +307,8 @@ function App() {
             onClick={() => {
               startListning();
               setMsg(false);
+              setCmdflag(false);
+              setTypingflag(false);
             }}
           >
             Start Listning
