@@ -276,7 +276,7 @@ function App() {
                       Listen
                     </button>
                   )}
-                  {speaking && listenflag + 1 == index && (
+                  {speaking && listenflag == index && (
                     <button
                       className="btn"
                       onClick={() => {
