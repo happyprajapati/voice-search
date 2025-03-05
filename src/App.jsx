@@ -21,7 +21,6 @@ function App() {
   const [cmdflag, setCmdflag] = useState(false);
   const [typingflag, setTypingflag] = useState(false);
   const [typingbtn, setTypingbtn] = useState(1);
-  const [del, setDel] = useState(20);
   const [listenflag, setListenflag] = useState(0);
   const controller = useRef();
   const { speak, cancel, speaking } = useSpeechSynthesis();
@@ -170,14 +169,6 @@ function App() {
       }
     }
   }, [listening]);
-
-  useEffect(() => {
-    if(typingflag){
-      setDel(1);
-    }else{
-      setDel(20);
-    }
-  },[typingflag])
 
   useEffect(() => {
     chat.map((data, index) => {
