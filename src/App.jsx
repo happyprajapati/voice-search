@@ -5,7 +5,6 @@ import SpeechRecognation, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { Typewriter } from "react-simple-typewriter";
-import { Ticker } from "react-ticker";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { Rings, RotatingLines } from "react-loader-spinner";
@@ -193,11 +192,6 @@ function App() {
     <>
       <div className="prompt">
         <h1>
-        <Ticker>
-        {() => (
-          <div dangerouslySetInnerHTML={{ __html: "React.js, often referred to as just React, is a <strong>JavaScript library for building user interfaces (UIs) or UI components</strong>. It is maintained by Facebook (Meta) and a large community of individual developers and companies.<br><br>Here's a breakdown of what that means:<br><br>   <strong>JavaScript Library:</strong> React is not a full-fledged framework like Angular or Vue.js." }} />
-        )}
-      </Ticker>
           <Typewriter
             words={["welcome to nobody's terminal"]}
             typeSpeed={50}
