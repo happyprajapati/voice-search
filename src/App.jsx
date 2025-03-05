@@ -5,6 +5,7 @@ import SpeechRecognation, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { Typewriter } from "react-simple-typewriter";
+import { TypeAnimation } from "react-type-animation";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { Rings, RotatingLines } from "react-loader-spinner";
@@ -262,7 +263,7 @@ function App() {
                         setTypingflag(true);
                       }}
                     >
-                      Fast Typing
+                      Skip Typing
                     </button>
                   )}
                   {!speaking && (
@@ -287,14 +288,17 @@ function App() {
                     </button>
                   )}
                   <br />
-                  &gt; &nbsp;
-                  (
-                    <Typewriter
-                      words={[data.ans]}
-                      typeSpeed={del}
-                      cursorStyle="|"
-                    />
-                  )
+                  { typingflag ? <pre>&gt; &nbsp;{data.ans}</pre> : (
+                    <>
+                      &gt; &nbsp;
+                        <TypeAnimation
+                          sequence={[data.ans]}
+                          wrapper="span"
+                          speed={80}
+                          style={{ whiteSpace: "pre-line" }}
+                        />
+                    </>
+                  )}
                 </div>
               )
             );

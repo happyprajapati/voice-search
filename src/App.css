@@ -7,6 +7,12 @@ body{
   font-family: 'Handjet', cursive;
 }
 
+pre{
+  font-family: 'Handjet', cursive;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 .prompt{
   display: flex;
   flex-direction: column;
@@ -18,7 +24,6 @@ body{
 
 .terminal{
   color: #ffffff;
-  /* filter: drop-shadow(0 0 8px #ffffff); */
   margin: 0 30px;
   font-size: 24px;
 }
