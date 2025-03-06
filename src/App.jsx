@@ -1,6 +1,6 @@
 import "regenerator-runtime/runtime";
 import axios from "axios";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import SpeechRecognation, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -19,8 +19,9 @@ function App() {
   const [loader, setLoader] = useState(false);
   const [flag, setFlag] = useState(true);
   const [cmdflag, setCmdflag] = useState(false);
-  const [typingflag, setTypingflag] = useState(false);
-  const [typingbtn, setTypingbtn] = useState(1);
+  const [skipTypingflag, setSkipTypingflag] = useState(false);
+  const [showSkipTypingflag, setShowSkipTypingflag] = useState(false);
+  const [currentAns, setCurrentAns] = useState(1);
   const [listenflag, setListenflag] = useState(0);
   const controller = useRef();
   const { speak, cancel, speaking } = useSpeechSynthesis();
@@ -54,7 +55,6 @@ function App() {
       ]);
     }
     setLoader(false);
-    setTypingflag(false);
     abortReq();
   };
 
@@ -65,7 +65,6 @@ function App() {
         resetTranscript();
         setChat([{ que: "", ans: "" }]);
         setLoader(false);
-        setTypingflag(false);
         abortReq();
       },
     },
@@ -83,7 +82,6 @@ function App() {
           ]);
         }
         setLoader(false);
-        setTypingflag(false);
         abortReq();
       },
     },
@@ -155,7 +153,8 @@ function App() {
               ]);
             }
             setLoader(false);
-            setTypingflag(false);
+            setSkipTypingflag(false);
+            setShowSkipTypingflag(true);
           })
           .catch((err) => {
             if (axios.isCancel(err)) {
@@ -172,16 +171,34 @@ function App() {
 
   useEffect(() => {
     chat.map((data, index) => {
-      setTypingbtn(index);
+      setCurrentAns(index);
     })
   },[chat])
+  
+  useLayoutEffect(() => {
+    const observer = new MutationObserver(() => {
+      const bodyHeight = document.body.scrollHeight;
+      const windowHeight = window.innerHeight;
+
+      if (bodyHeight > windowHeight) {
+        window.scrollTo(0, bodyHeight);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,    
+      subtree: true,      
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!browserSupportsSpeechRecognition) {
     return null;
   }
 
   return (
-    <>
+    <div>
       <div className="prompt">
         <h1>
           <Typewriter
@@ -210,7 +227,7 @@ function App() {
         )}
       </div>
 
-      <div className="terminal">
+      <div className="listner">
         {listening && (
           <Rings
             height="35"
@@ -224,6 +241,17 @@ function App() {
           />
         )}
         {transcript && <p>&gt; &nbsp;{transcript}</p>}
+        {showSkipTypingflag && (
+          <button
+            className="btn"
+            onClick={() => {
+              setSkipTypingflag(true);
+              setShowSkipTypingflag(false);
+            }}
+          >
+            Skip Typing
+          </button>
+        )}
         <br />
         {loader && (
           <RotatingLines
@@ -234,7 +262,9 @@ function App() {
             visible={true}
           />
         )}
+      </div>
 
+      <div className="terminal">
         {
           chat.map((data, index) => {
             return (
@@ -247,16 +277,6 @@ function App() {
                     typeSpeed={20}
                     cursorStyle="|"
                   />
-                  {typingbtn == index && (
-                    <button
-                      className="btn"
-                      onClick={() => {
-                        setTypingflag(true);
-                      }}
-                    >
-                      Skip Typing
-                    </button>
-                  )}
                   {!speaking && (
                     <button
                       className="btn"
@@ -279,17 +299,19 @@ function App() {
                     </button>
                   )}
                   <br />
-                  { typingflag ? <pre>&gt; &nbsp;{data.ans}</pre> : (
+                  {(currentAns !== index || skipTypingflag) && <pre>&gt; &nbsp;{data.ans}</pre>}
+                  { !skipTypingflag && currentAns == index && 
                     <>
                       &gt; &nbsp;
                         <TypeAnimation
                           sequence={[data.ans]}
                           wrapper="span"
                           speed={80}
+                          cursor={false}
                           style={{ whiteSpace: "pre-line" }}
                         />
                     </>
-                  )}
+                  }
                 </div>
               )
             );
@@ -307,7 +329,7 @@ function App() {
               startListning();
               setMsg(false);
               setCmdflag(false);
-              setTypingflag(false);
+              setShowSkipTypingflag(false);
             }}
           >
             Start Listning
@@ -330,7 +352,7 @@ function App() {
           </a>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

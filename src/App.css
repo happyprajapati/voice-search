@@ -22,13 +22,21 @@ pre{
   filter: drop-shadow(0 0 8px #ffffff);
 }
 
-.terminal{
+.terminal, .listner{
   color: #ffffff;
   margin: 0 30px;
   font-size: 24px;
 }
 
-.terminal p{
+.listner{
+  padding: 15px 0px;
+  position: sticky;
+  top: 0;
+  background: #000000;
+  z-index: 10;
+}
+
+.listner p{
   margin: 0;
   display: inline-block;
 }
